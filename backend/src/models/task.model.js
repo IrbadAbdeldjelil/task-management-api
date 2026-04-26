@@ -16,8 +16,8 @@ const Task = sequelize.define('Task', {
         allowNull: true
     },
     "status": {
-        type: DataTypes.ENUM('todo', 'in-progress', 'done'),
-        defaultValue: "todo"
+        type: DataTypes.ENUM('in-progress', 'done'),
+        defaultValue: "in-progress"
     },
     "userId": {
         type: DataTypes.UUID,

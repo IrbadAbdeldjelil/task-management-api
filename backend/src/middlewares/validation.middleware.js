@@ -1,5 +1,9 @@
  const {z} = require('zod');
  
+ // user Id uuid
+ const uuidSchema = z.object({
+    id: z.uuidv4()
+ })
  // signup
  const signupSchema = z.object({
     username: z.string().min(3),
@@ -30,9 +34,22 @@ function validate(schema) {
     };
 };
 
+// uuid validation
+function validateUUID(schema) {
+    return async (req, res, next) => {
+       
+        const resaults = schema.safeParse(req.params);
+        if(!resaults.success) next(resaults.error);
+        req.uuid = resaults.data;
+        next();
+    };
+};
+
 module.exports = {
     signupSchema,
     signinSchema,
     todoSchema,
-    validate
+    uuidSchema,
+    validate,
+    validateUUID
 };

@@ -27,7 +27,8 @@ module.exports.signin = async (req, res, next) => {
     const isUser = await User.findOne({where: {email}});
     if (!isUser) throw createError(401, 'Invalid email or password');
     if (!(await bcrypt.compare(password, isUser.password))) throw createError(401, 'Invalid password or email');
-
+    // update lastLogin
+    (await isUser.update({lastLogin: new Date().toISOString()})).save()
     const {accessToken } = createToken({id: isUser.id, role: isUser.role});
     sendResponse(res, true, 200, 'you signedin successfully', {
         username: isUser.username, 
@@ -38,6 +39,8 @@ module.exports.signin = async (req, res, next) => {
 
 //signout
 module.exports.signout = async (req, res, next) => {
+    const user = req.user;
+    (await user.update({lastActive: new Date().toISOString()})).save();
      sendResponse(res, true, 200, 'you signed out successfully', null, null); 
 }
 

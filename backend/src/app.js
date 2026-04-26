@@ -6,6 +6,7 @@ const cors = require('cors');
 const { ZodError } = require('zod');
 const authRoutes = require('./routes/auth.routes');
 const tasksRoutes = require('./routes/tasks.routes');
+const adminRoutes = require('./routes/admin.routes');
 const { limiter } = require('./middlewares/limit.middleware');
 const app = express();
 
@@ -28,6 +29,9 @@ app.use(limiter);
 app.use('/api/v1/auth', authRoutes);
 // tasks routes
 app.use('/api/v1/tasks', tasksRoutes);
+// admin routes
+app.use('/api/v1/admin', adminRoutes);
+
 // error handler
 app.use(function (err, req, res, next) {
      if (isDev) {
