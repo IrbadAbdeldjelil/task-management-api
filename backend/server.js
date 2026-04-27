@@ -8,7 +8,7 @@ async function start() {
     try {
         await sequelize.authenticate();
         console.log('connect to DB successfully');
-        await sequelize.sync({alter: true});
+        await sequelize.sync();
         console.log('table synced');
         app.listen(PORT, () => console.log(`the server is listening on ${PORT}`));
 

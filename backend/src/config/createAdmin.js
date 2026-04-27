@@ -7,7 +7,7 @@ const createAdmin = async function () {
       
        try {
             await sequelize.authenticate();
-            await sequelize.sync({alter: true});
+            await sequelize.sync();
             console.log('connected to DB successfully');
             
 
