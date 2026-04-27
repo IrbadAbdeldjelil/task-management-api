@@ -18,3 +18,11 @@
        req.user = user;
        next();
  }
+
+ module.exports.isAdmin = async (req, res,next) => {
+      const user = req.user;
+      if (user.role !== "admin") {
+         throw createError(403, 'Access denied, admins only');
+      }
+      next();
+ }

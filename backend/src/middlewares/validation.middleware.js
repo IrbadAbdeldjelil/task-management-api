@@ -28,7 +28,7 @@ function validate(schema) {
     return async (req, res, next) => {
        
         const resaults = schema.safeParse(req.body);
-        if(!resaults.success) next(resaults.error);
+        if(!resaults.success) return next(resaults.error);
         req.validated = resaults.data;
         next();
     };
@@ -39,7 +39,7 @@ function validateUUID(schema) {
     return async (req, res, next) => {
        
         const resaults = schema.safeParse(req.params);
-        if(!resaults.success) next(resaults.error);
+        if(!resaults.success) return next(resaults.error);
         req.uuid = resaults.data;
         next();
     };

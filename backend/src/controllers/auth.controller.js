@@ -40,8 +40,8 @@ module.exports.signin = async (req, res, next) => {
 //signout
 module.exports.signout = async (req, res, next) => {
     const user = req.user;
-    (await user.update({lastActive: new Date().toISOString()})).save();
-     sendResponse(res, true, 200, 'you signed out successfully', null, null); 
+    await user.update({lastActive: new Date().toISOString()});
+    sendResponse(res, true, 200, 'you signed out successfully', null, null); 
 }
 
 // // refresh token 

@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const morgan = require('morgan');
 //const cookieParser = require('cookie-parser');
@@ -7,14 +8,17 @@ const { ZodError } = require('zod');
 const authRoutes = require('./routes/auth.routes');
 const tasksRoutes = require('./routes/tasks.routes');
 const adminRoutes = require('./routes/admin.routes');
-const { limiter } = require('./middlewares/limit.middleware');
+const { apiLimiter, authLimiter } = require('./middlewares/limit.middleware');
 const app = express();
 
 const isDev = process.env.NODE_ENV === 'development';
 
 // security middlewares
 app.use(hemet());
-app.use(cors());
+app.use(cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true
+}));
    
 app.use(express.json({limit: '10kb'}));
 app.use(express.urlencoded({ extended: true}));
@@ -24,14 +28,24 @@ if (isDev) {
     app.use(morgan('dev'));
 }
 
-app.use(limiter);
 // auth routes
-app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/auth', authLimiter, authRoutes);
 // tasks routes
-app.use('/api/v1/tasks', tasksRoutes);
+app.use('/api/v1/tasks', apiLimiter, tasksRoutes);
 // admin routes
-app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/admin', apiLimiter, adminRoutes);
 
+// 404
+app.use((req, res) => {
+    res.status(404).json({
+        success: false,
+        statusCode: 404,
+        message: "not found",
+        errors: null,
+        data: null,
+        time: new Date().toISOString()
+    });
+});
 // error handler
 app.use(function (err, req, res, next) {
      if (isDev) {
@@ -66,16 +80,6 @@ app.use(function (err, req, res, next) {
     });
 });
 
-// 404
-app.use((req, res) => {
-    res.status(404).json({
-        success: false,
-        statusCode: 404,
-        message: "not found",
-        errors: null,
-        data: null,
-        time: new Date().toISOString()
-    });
-});
+
 
 module.exports = app;
