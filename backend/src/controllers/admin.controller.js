@@ -1,7 +1,7 @@
 const createError = require('http-errors');
 const { User, Task } = require('../models/relation.model');
 const { sendResponse } = require('../helpers/responses');
-const { sequelize } = require('../config/db.config')
+const sequelize = require('../config/db.config')
 
 // get all users
 module.exports.getUsers = async(req, res, next) => {
