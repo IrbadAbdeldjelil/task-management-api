@@ -1,7 +1,7 @@
 const createError = require('http-errors');
 const { User, Task } = require('../models/relation.model');
 const { sendResponse } = require('../helpers/responses');
-const { sequelize } = require('../config/db.config')
+const sequelize = require('../config/db.config')
 
 // get all users
 module.exports.getUsers = async(req, res, next) => {
@@ -70,8 +70,8 @@ module.exports.deleteUser = async(req, res, next) => {
     const user = await User.findByPk(id);
 
     if(!user) throw createError(404, 'user not exist');
-    const deleted = await User.destroy({where:{id}});
-    if(!deleted) throw createError(500, 'something went wrong, cannot delete');
+    await User.destroy({where:{id}});
+
     sendResponse(res, true, 200, 'user deleted successfully', null, null);
 }
 

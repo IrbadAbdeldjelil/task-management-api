@@ -4,8 +4,8 @@
 
  module.exports.auth = async (req, res, next) => {
        const token = req.headers['authorization'];
-       if(!token) throw createError(409, 'Access denied');
-       if(!token.startsWith('Bearer')) throw createError(409, 'Access denied');
+       if(!token) throw createError(401, 'Access denied');
+       if(!token.startsWith('Bearer')) throw createError(401, 'Access denied');
         
        let decoded;
        try {
@@ -14,7 +14,7 @@
          throw createError(401, 'Invalid or expired token');
        }
        const user = await User.findByPk(decoded.id);
-       if(!user) throw createError(409, 'user no longer exists');
+       if(!user) throw createError(404, 'user no longer exists');
        req.user = user;
        next();
  }

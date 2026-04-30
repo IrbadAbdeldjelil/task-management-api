@@ -3,13 +3,17 @@ const sequelize = require('./src/config/db.config')
 const app = require('./src/app');
 const PORT = process.env.PORT || 3000;
 
+const isDev = process.env.NODE_ENV === 'development';
+
 async function start() {
     // connet to db
     try {
         await sequelize.authenticate();
         console.log('connect to DB successfully');
-        await sequelize.sync();
-        console.log('table synced');
+        if (isDev) {
+           await sequelize.sync({alter: true});
+           console.log('table synced');
+        }
         app.listen(PORT, () => console.log(`the server is listening on ${PORT}`));
 
     } catch (err) {

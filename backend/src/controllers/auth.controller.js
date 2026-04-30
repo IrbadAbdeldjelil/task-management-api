@@ -11,7 +11,7 @@ module.exports.signup = async (req, res, next) => {
       const {username, email, password} = req.validated;
 
       const isUser = await User.findOne({where:{email}});
-      if(isUser) throw createError(401, 'email already exists');
+      if(isUser) throw createError(400, 'email already exists');
 
       const hashPassword = await bcrypt.hash(password, 12);
       const newUser = await User.create({username, email, password: hashPassword});
@@ -26,7 +26,7 @@ module.exports.signin = async (req, res, next) => {
     const {email, password} = req.validated;
     const isUser = await User.findOne({where: {email}});
     if (!isUser) throw createError(401, 'Invalid email or password');
-    if (!(await bcrypt.compare(password, isUser.password))) throw createError(401, 'Invalid password or email');
+    if (!(await bcrypt.compare(password, isUser.password))) throw createError(401, 'Invalid email or password');
     // update lastLogin
     (await isUser.update({lastLogin: new Date().toISOString()})).save()
     const {accessToken } = createToken({id: isUser.id, role: isUser.role});
@@ -44,6 +44,25 @@ module.exports.signout = async (req, res, next) => {
     sendResponse(res, true, 200, 'you signed out successfully', null, null); 
 }
 
+// dashboard
+module.exports.dashboard = async (req, res, next) => {
+      
+    const user = req.user;
+    const tasks = await user.getTasks();
+    const completedTasks = await user.getTasks({where:{status: 'done'}});
+    const uncompletedTasks = await user.getTasks({where:{status: 'in-progress'}});
+
+    sendResponse(res, true, 200, 'welcom to your profile', {
+        user: {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+        },
+        tasks,
+        completedTasks,
+        uncompletedTasks
+    })
+}
 // // refresh token 
 // module.exports.refreshToken = async (req, res, next) => {
 //       const refresh = req.cookies.refreshToken;

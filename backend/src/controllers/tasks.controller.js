@@ -8,22 +8,14 @@ module.exports.createTask = async (req, res, next) => {
     const {title, description} = req.validated;
     const user = req.user;
     const task = await user.createTask({title, description});
-    if (!task) {
-        throw createError(401, 'something went wrong on creating task');
-    }
+    
     sendResponse(res, true, 201, 'task created successfully', task, null);
 
 }
 // get all tasks
 module.exports.getTasks = async (req, res, next) => {
-      const userId = req.user.id;
-      const tasks = await Task.findAll({
-        where: {userId}, 
-        include:{
-            model: User,
-            attributes: ["username", "email", "role"]
-        }
-    });
+    const user = req.user;
+    const tasks = await user.getTasks({order:[['creadedAt', 'DESC']]});
       sendResponse(res, true, 200, 'all tasks', tasks, null);
 };
 
@@ -33,16 +25,11 @@ module.exports.getTask = async (req, res, next) => {
     const id = req.params.id;
     validateId(id);
     const user = req.user;
-    const task = await Task.findOne({
-        where: {id, userId: user.id},
-        include:{
-            model: User,
-            attributes: ["username", "email", "role"]
-        }
-    });
+    const task = await Task.findOne({where: {id, userId: user.id}});
     if (!task) {
        throw createError(404, 'task not exist');
     }
+    
     sendResponse(res, true, 200, 'task found successfully', task, null)
 };
 
