@@ -21,7 +21,15 @@
 const todoSchema = z.object({
     title: z.string(),
     description: z.string().optional(),
-    status: z.enum(['in-progress', 'done']).optional()
+    status: z.enum(['in-progress', 'done']).optional(),
+    priority: z.enum(['high', 'medium', 'low']),
+    dueDate: z.string()
+    .datetime({ message: "dueDate must be ISO 8601" })
+    .refine((val) => new Date(val) > new Date(), {
+      message: "dueDate must be in the future",
+    })
+    .optional()
+    .nullable(), 
 });
 
 function validate(schema) {

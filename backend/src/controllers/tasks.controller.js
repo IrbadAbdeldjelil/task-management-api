@@ -5,9 +5,9 @@ const { sendResponse } = require('../helpers/responses');
 // create
 module.exports.createTask = async (req, res, next) => {
        
-    const {title, description} = req.validated;
+    const {title, description, dueDate, priority} = req.validated;
     const user = req.user;
-    const task = await user.createTask({title, description});
+    const task = await user.createTask({title, description, dueDate, priority});
     
     sendResponse(res, true, 201, 'task created successfully', task, null);
 
@@ -15,7 +15,7 @@ module.exports.createTask = async (req, res, next) => {
 // get all tasks
 module.exports.getTasks = async (req, res, next) => {
     const user = req.user;
-    const tasks = await user.getTasks({order:[['creadedAt', 'DESC']]});
+    const tasks = await user.getTasks({order:[['createdAt', 'DESC']]});
       sendResponse(res, true, 200, 'all tasks', tasks, null);
 };
 
@@ -39,17 +39,20 @@ module.exports.updateTask = async (req, res, next) => {
       const id = req.params.id;
       validateId(id);
       const user = req.user;
-      const {title, description, status} = req.validated;
+      const {title, description, status, dueDate, priority} = req.validated;
       const isTask = await Task.findOne({where: {id, userId: user.id}});
       if (!isTask) {
         throw createError(404, 'task not exist');
       }
-      const updated = await Task.update({title, description, status: status || isTask.status}, {where:{id}});
+      const updated = await Task.update({title, description, status: status ||
+      isTask.status, dueDate, priority}, {where:{id}});
       sendResponse(res, true, 200, 'task updated successfuly', {
         id: isTask.id,
         title,
         description,
         status: status || isTask.status,
+        dueDate: isTask.dueDate,
+        priority,
         userId: isTask.userId
     }, null);
 }

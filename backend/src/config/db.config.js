@@ -2,7 +2,7 @@ const { Sequelize } = require('sequelize');
 
 const isDev = process.env.NODE_ENV === 'development';
 const sequelize = new Sequelize(process.env.DB_URL, {
-    dialect: 'postgres',
+    dialect: process.env.DB_DIALECT,
     logging: false,
     dialectOptions:{
         ssl: !isDev?{
