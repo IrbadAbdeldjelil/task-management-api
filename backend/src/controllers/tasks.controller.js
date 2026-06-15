@@ -5,9 +5,9 @@ const { sendResponse } = require('../helpers/responses');
 // create
 module.exports.createTask = async (req, res, next) => {
        
-    const {title, description, dueDate, priority} = req.validated;
+    const {title, description, status, dueDate, priority} = req.validated;
     const user = req.user;
-    const task = await user.createTask({title, description, dueDate, priority});
+    const task = await user.createTask({title, description, status, dueDate, priority});
     
     sendResponse(res, true, 201, 'task created successfully', task, null);
 
@@ -15,6 +15,7 @@ module.exports.createTask = async (req, res, next) => {
 // get all tasks
 module.exports.getTasks = async (req, res, next) => {
     const user = req.user;
+    console.log(user.avatar)
     const tasks = await user.getTasks({order:[['createdAt', 'DESC']]});
       sendResponse(res, true, 200, 'all tasks', tasks, null);
 };

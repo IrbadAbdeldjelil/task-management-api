@@ -21,7 +21,7 @@
 const todoSchema = z.object({
     title: z.string(),
     description: z.string().optional(),
-    status: z.enum(['in-progress', 'done']).optional(),
+    status: z.enum(['todo', 'in-progress', 'done']).optional(),
     priority: z.enum(['high', 'medium', 'low']),
     dueDate: z.string()
     .datetime({ message: "dueDate must be ISO 8601" })

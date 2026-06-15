@@ -1,15 +1,27 @@
 const { Router } = require('express');
-const { signup, signin, signout, dashboard } = require('../controllers/auth.controller');
+const { signup, signin, signinWithGoogle,signout, dashboard, verifyEmail } = require('../controllers/auth.controller');
 const { signinSchema, signupSchema, validate } = require('../middlewares/validation.middleware')
 const {auth } = require('../middlewares/auth.middleware');
-const routes = new Router();
+const passport = require('passport');
+const router = Router();
+router.post('/signup', validate(signupSchema), signup);
+router.post('/signin', validate(signinSchema), signin);
+router.get('/verify-email', verifyEmail);
 
-routes.post('/signup', validate(signupSchema), signup);
-routes.post('/signin', validate(signinSchema), signin);
+//0auth2
+router.get('/google', passport.authenticate('google', {
+  scope: ['profile', 'email']
+}));
 
-routes.use(auth);
-//routes.get('/refresh-token', refreshToken);
-routes.post('/signout', signout);
+router.get('/google/callback',
+  passport.authenticate('google', {
+    session: false}),
+  signinWithGoogle
+);
+
+router.use(auth);
+//router.get('/refresh-token', refreshToken);
+router.post('/signout', signout);
 //dashboard
-routes.get('/dashboard', dashboard);
-module.exports = routes;
+router.get('/dashboard', dashboard);
+module.exports = router;

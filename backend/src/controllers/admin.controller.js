@@ -7,7 +7,7 @@ const sequelize = require('../config/db.config')
 module.exports.getUsers = async(req, res, next) => {
     
     const users = await User.findAll({
-        attributes:["id", "username", "email", "createdAt","lastActive", "lastLogin",
+        attributes:["id", "username", "email", "createdAt","lastActive", "lastLogin", "avatar",
            [sequelize.fn('COUNT', sequelize.col('Tasks.id')), 'Tasks'],
            [sequelize.literal(`(
                 SELECT COUNT(*) FROM "Tasks"
@@ -34,30 +34,35 @@ module.exports.getUsers = async(req, res, next) => {
 module.exports.getUser = async(req, res, next) => {
 
     const {id} = req.uuid;
-    const user = await User.findOne({
-        where:{id},
-        attributes:[
-            "username", "email", "lastActive", "lastLogin",
-            [sequelize.literal(`(
-                   SELECT COUNT(*) FROM "Tasks"
-                   WHERE "Tasks"."userId" = "User"."id" 
-                )`), 'Tasks'],
-            [sequelize.literal(`(
-                     SELECT COUNT(*) FROM "Tasks"
-                     WHERE "Tasks"."userId" = "User"."id"
-                     AND "Tasks"."status" = 'done'
-                    )`), 'done'],
-            [sequelize.literal(`(
-                        SELECT COUNT(*) FROM "Tasks"
-                        WHERE "Tasks"."userId" = "User"."id"
-                        AND "Tasks"."status" = 'in-progress'
-                        )`), 'in-progress']
-                    ],
-            include:{
-                model: Task,
-                attributes:[]
-            }            
-            });
+   const user = await User.findOne({
+    where: { id },
+    attributes: [                          // ← attributes لوحدها
+        "username", "email", "lastActive", "lastLogin", "avatar",
+        [sequelize.literal(`(
+            SELECT COUNT(*) FROM "Tasks"
+            WHERE "Tasks"."userId" = "User"."id"
+        )`), 'Tasks'],
+        [sequelize.literal(`(
+            SELECT COUNT(*) FROM "Tasks"
+            WHERE "Tasks"."userId" = "User"."id"
+            AND "Tasks"."status" = 'done'
+        )`), 'done'],
+        [sequelize.literal(`(
+            SELECT COUNT(*) FROM "Tasks"
+            WHERE "Tasks"."userId" = "User"."id"
+            AND "Tasks"."status" = 'in-progress'
+        )`), 'in-progress'],
+        [sequelize.literal(`(
+            SELECT COUNT(*) FROM "Tasks"
+            WHERE "Tasks"."userId" = "User"."id"
+            AND "Tasks"."status" = 'todo'
+        )`), 'todo']
+    ],
+    include: {                             // ← include لوحده هنا
+        model: Task,
+        attributes: []
+    }
+});
         if(!user) throw createError(404, 'user not exist');
     sendResponse(res, true, 200, 'user is found successfully', [user], null)
 }

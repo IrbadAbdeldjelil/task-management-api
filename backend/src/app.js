@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 //const cookieParser = require('cookie-parser');
@@ -9,16 +10,21 @@ const authRoutes = require('./routes/auth.routes');
 const tasksRoutes = require('./routes/tasks.routes');
 const adminRoutes = require('./routes/admin.routes');
 const { apiLimiter, authLimiter } = require('./middlewares/limit.middleware');
+const passport = require('passport');
+require('./config/passport.config.js');
 const app = express();
 
 const isDev = process.env.NODE_ENV === 'development';
 
 // security middlewares
-app.use(hemet());
+//app.use(hemet());
 app.use(cors());
    
 app.use(express.json({limit: '10kb'}));
+// passport init
+app.use(passport.initialize());
 app.use(express.urlencoded({ extended: true}));
+app.use(express.static(path.join(__dirname, '../../frontend/')));
 //app.use(cookieParser());
 // logging
 if (isDev) {

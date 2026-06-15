@@ -7,6 +7,11 @@ const User = sequelize.define('User', {
         defaultValue: DataTypes.UUIDV4,
         primaryKey: true
     },
+    "googleId": {
+       type: DataTypes.STRING,
+       unique: true,
+       allowNull: true
+    },
     "username": {
         type: DataTypes.STRING,
         allowNull: false
@@ -19,9 +24,13 @@ const User = sequelize.define('User', {
             isEmail: true
         }
     },
+    "avatar": {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
     "password": {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true /*true; google user haven't password*/
     },
     "role": {
         type: DataTypes.ENUM('user', 'admin'),
@@ -34,6 +43,14 @@ const User = sequelize.define('User', {
     "lastActive": {
         type: DataTypes.DATE,
         allowNull: true
+    },
+    "verifyEmailToken": {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    "is_verified": {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false
     }
 
 },{
