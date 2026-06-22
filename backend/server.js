@@ -11,11 +11,9 @@ async function start() {
         await sequelize.authenticate();
         console.log('connect to DB successfully');
         if (isDev) {
-  await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
-  await sequelize.sync({ alter: true });
-  await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
-  console.log('tables synced');
-}
+           await sequelize.sync({ alter: true });
+           console.log('tables synced');
+         }
         app.listen(PORT, () => console.log(`the server is listening on ${PORT}`));
 
     } catch (err) {

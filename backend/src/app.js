@@ -2,7 +2,7 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
-//const cookieParser = require('cookie-parser');
+const cookieParser = require('cookie-parser');
 const hemet = require('helmet');
 const cors = require('cors');
 const { ZodError } = require('zod');
@@ -17,7 +17,7 @@ const app = express();
 const isDev = process.env.NODE_ENV === 'development';
 
 // security middlewares
-//app.use(hemet());
+app.use(hemet());
 app.use(cors());
    
 app.use(express.json({limit: '10kb'}));
@@ -25,7 +25,7 @@ app.use(express.json({limit: '10kb'}));
 app.use(passport.initialize());
 app.use(express.urlencoded({ extended: true}));
 app.use(express.static(path.join(__dirname, '../../frontend/')));
-//app.use(cookieParser());
+app.use(cookieParser());
 // logging
 if (isDev) {
     app.use(morgan('dev'));

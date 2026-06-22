@@ -1,4 +1,4 @@
-//const { verify } = require('jsonwebtoken');
+const { verify } = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const createError = require('http-errors');
@@ -6,7 +6,7 @@ const { User } = require('../models/relation.model');
 const { sendResponse } = require('../helpers/responses');
 const { createToken } = require('../helpers/createToken');
 const { sendVerificationEmail } = require('../helpers/sendVerificationEmail.js')
-
+const {cookieOptions} = require('../config/cookie.config.js');
 // signup
 module.exports.signup = async (req, res, next) => {
     
@@ -50,15 +50,16 @@ module.exports.verifyEmail = async (req, res, next) => {
 	user.verifyEmailToken = null;
 	await user.save();
 	// create tokens 
-	 const { accessToken } = createToken({id: user.id, role: user.role});
+	 const { accessToken, refreshToken } = createToken({id: user.id, role: user.role});
    // create cookies 
-
+   res.cookie('refreshToken', refreshToken, cookieOptions);
 	sendResponse(res, true, 200, 'email verified successfully', {
         username: user.username, 
         email: user.email,
         avatar: user.avatar,
         role: user.role,
-        accessToken
+        accessToken,
+        refreshToken
     }, null);
 }
 
@@ -73,12 +74,15 @@ module.exports.signin = async (req, res, next) => {
   if (!user.is_verified) throw createError(403, 'Please verify your email first');
   
   await user.update({lastLogin: new Date()});
-  const {accessToken} = createToken({id: user.id, role: user.role});
+  const {accessToken, refreshToken} = createToken({id: user.id, role: user.role});
+   // create cookies 
+   res.cookie('refreshToken', refreshToken, cookieOptions);
   sendResponse(res, true, 200, 'Signed in successfully', 
   {username: user.username, 
   email,
   avatar: user.avatar,
-  accessToken}, null);
+  accessToken
+  }, null);
 }
 
 //signinWithGoogle
@@ -87,17 +91,19 @@ module.exports.signinWithGoogle = async (req, res, next) => {
     console.log('signinWithGoogle - user:', req.user?.id);
     const user = req.user;
     await user.update({ lastLogin: new Date() }, { fields: ['lastLogin'] });
-    const { accessToken } = createToken({ id: user.id, role: user.role });
-    console.log('Token created, redirecting...');
+    const { accessToken, refreshToken } = createToken({ id: user.id, role: user.role });
+     // create cookies 
+   res.cookie('refreshToken', refreshToken, cookieOptions);
+
     res.redirect(`/oauth-callback.html?token=${accessToken}`);
   } catch (err) {
-    console.error('ERROR in signinWithGoogle:', err); // <-- ده هيكشف المشكلة
     return next(err);
   }
 }
 //signout
 module.exports.signout = async (req, res, next) => {
     const user = req.user;
+    res.clearCookie("refreshToken");
     await user.update({lastActive: new Date().toISOString()});
     sendResponse(res, true, 200, 'you signed out successfully', null, null); 
 }
@@ -125,25 +131,27 @@ module.exports.dashboard = async (req, res, next) => {
         toDoTasks
     })
 }
-// // refresh token 
-// module.exports.refreshToken = async (req, res, next) => {
-//       const refresh = req.cookies.refreshToken;
-//       if(!refreshToken) throw createError(403, 'refresh token is required');
+// refresh token 
+module.exports.refreshToken = async (req, res, next) => {
+      const refreshToken = req.cookies.refreshToken;
+      if(!refreshToken) throw createError(403, 'refresh token is required');
       
-//       let decoded;
-//       try {
-//         decoded = verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-//       } catch (err) {
-//         throw createError(403, 'Invalid or expired refresh tokn');
-//       }
-//       const user = await User.findByPk(decoded.id);
-//       if(!user) throw createError(404, 'user not longer exist');
+      let decoded;
+      try {
+        decoded = verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+      } catch (err) {
+        throw createError(403, 'Invalid or expired refresh tokn');
+      }
+      const user = await User.findByPk(decoded.id);
+      if(!user) throw createError(404, 'user not longer exist');
       
-//       const { accessToken } = createToken({
-//         id: user.id,
-//         role: user.role
-//       });
-
-//       res.setHeader('authorization', `Bearer ${accessToken}`);
-//       sendResponse(res, true, 201, 'token refreshed successfully', null, null)
-// }
+      const { accessToken, refreshToken:newRefreshToken } = createToken({
+        id: user.id,
+        role: user.role
+      });
+ 
+      // create cookies 
+      res.cookie('refreshToken', newRefreshToken, cookieOptions);
+      res.setHeader('authorization', `Bearer ${accessToken}`);
+      sendResponse(res, true, 201, 'token refreshed successfully', {accessToken}, null)
+}

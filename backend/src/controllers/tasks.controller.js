@@ -52,7 +52,7 @@ module.exports.updateTask = async (req, res, next) => {
         title,
         description,
         status: status || isTask.status,
-        dueDate: isTask.dueDate,
+        dueDate: dueDate !== undefined ? dueDate : isTask.dueDate,
         priority,
         userId: isTask.userId
     }, null);

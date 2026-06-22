@@ -33,7 +33,7 @@ module.exports.getUsers = async(req, res, next) => {
 // get user by ID
 module.exports.getUser = async(req, res, next) => {
 
-    const {id} = req.uuid;
+   const {id} = req.uuid;
    const user = await User.findOne({
     where: { id },
     attributes: [                          // ← attributes لوحدها
