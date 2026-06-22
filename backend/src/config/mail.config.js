@@ -8,7 +8,7 @@ const transporter = createTransport({
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   },
-  family: 4 /* ipv4 */
+  family: process.env.NODE_ENV === 'production' ? 6 : 4 /* ipv4 or ipv6*/
 });
 
 // اختبر الاتصال أول ما السيرفر يشتغل
