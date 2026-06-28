@@ -8,8 +8,6 @@
 
 A secure and fast REST API for task management, built with Node.js and Express. Supports JWT authentication, Google OAuth2, and email verification.
 
-🔗 **Live API:** https://todo-backend-api-z3i0.onrender.com
-
 ---
 
 ## Features
